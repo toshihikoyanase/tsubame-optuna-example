@@ -43,7 +43,7 @@ With the container, install Python dependencies under the user directory:
 $ pip install --user mpi4py psycopg2-binary
 
 # hvd.broadcast_variables is not supported in the old version of Horovod
-$ pip install --user -U horovod  
+$ HOROVOD_WITH_TENSORFLOW=1 pip install --user -U --no-cache-dir horovod
 ```
 
 To deal with MPI-based learning, you need to install a developing branch of Optuna, because the [MPIStudy](https://github.com/pfnet/optuna/blob/horovod-examples/optuna/integration/mpi.py#L46) class has not been merged to the master.
@@ -127,12 +127,13 @@ $ STUDY_NAME=`~/.local/bin/optuna create-study --storage $STORAGE_URL`
 To run the MPI example:
 
 ```console
-$ mpirun -np 2 -bind-to none -map-by slot -- python tensorflow_mnist_eager_optuna.py $STUDY_NAME $STORAGE_URL
+$ mpirun -np 2 -bind-to none -map-by slot -- \
+    python tsubame-optuna-horovod-example/tensorflow_mnist_eager_optuna.py $STUDY_NAME $STORAGE_URL
 ```
 
 You can list the history of optimization as follows.
 ```console
-$ python print_study_history.py $STUDY_NAME $STORAGE_URL
+$ python tsubame-optuna-horovod-example/print_study_history.py $STUDY_NAME $STORAGE_URL
 ```
 
 ## See Also
