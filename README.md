@@ -1,6 +1,6 @@
-# ABCI Optuna Examples
+# Optuna Examples for TSUBAME3.0
 
-This is a tutorial material to use Optuna in the [ABCI](https://abci.ai/) infrastructure (unofficial).
+This is a tutorial material to use Optuna in the [TSUBAME3.0](https://www.t3.gsic.titech.ac.jp/) infrastructure (unofficial).
 
 This tutorial describes:
 
@@ -8,12 +8,12 @@ This tutorial describes:
 - How to parallelize single node ML training.
 - How to parallelize multi-node, MPI-based ML training.
 
-## Launch PostgreSQL in ABCI
+## Launch PostgreSQL in TSUBAME
 
 ```console
 $ GROUP=<YOUR_GROUP>
 
-$ qrsh -g $GROUP -l rt_C.small=1 -l h_rt=12:00:00
+$ qrsh -g $GROUP -l s_core=1 -l h_rt=12:00:00
 $ module load singularity/2.6.1
 $ singularity build postgres.img docker://postgres
 
@@ -23,7 +23,7 @@ $ singularity run -B postgres_data:/var/lib/postgresql/data postgres.img /docker
 
 The RDB URL is as follows:
 ```console
-$ STORAGE_HOST=<HOST_WHERE_POSTGRES_IS_RUNNING>  # e.g., STORAGE_HOST=g0002
+$ STORAGE_HOST=<HOST_WHERE_POSTGRES_IS_RUNNING>  # e.g., STORAGE_HOST=r7i7n7-cnode00
 $ STORAGE_URL=postgres://postgres@$STORAGE_HOST:5432/
 ```
 
@@ -50,7 +50,7 @@ To deal with MPI-based learning, you need to install a developing branch of Optu
 
 ```console
 $ pip uninstall optuna  # If you've already installed Optuna.
-$ pip install --user git+https://github.com/pfnet/optuna.git@horovod-examples
+$ pip install --user git+https://github.com/pfnet/optuna.git@titech-horovod-examples
 ```
 
 ## Distributed Optimization for Single Node Learning
@@ -71,7 +71,7 @@ Set up a shell script for qsub command, e.g.:
 ```console
 $ echo "module load singularity/2.6.1" >> run_quadratic.sh
 $ echo "singularity shell --nv horovod-0.15.2-tf1.12.0-torch1.0.0-py3.5.simg" >> run_quadratic.sh
-$ echo "python abci-optuna-horovod-example/quadratic.py $STUDY_NAME $STORAGE_URL" >> run_quadratic.sh
+$ echo "python tsubame-optuna-horovod-example/quadratic.py $STUDY_NAME $STORAGE_URL" >> run_quadratic.sh
 ```
 
 You can parallelize the optimization just by submitting multiple jobs.
@@ -104,7 +104,7 @@ Here, we'll run the example with interactive node. (You also can consolidate the
 
 ```console
 $ GROUP=<YOUR_GROUP>
-$ qrsh -g $GROUP -l rt_F=1 -l h_rt=01:00:00
+$ qrsh -g $GROUP -l h_node=1 -l h_rt=01:00:00
 ```
 
 Run a container:
