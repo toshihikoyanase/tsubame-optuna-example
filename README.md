@@ -71,7 +71,7 @@ Set up a shell script for qsub command, e.g.:
 ```console
 $ echo "module load singularity/2.6.1" >> run_quadratic.sh
 $ echo "singularity shell --nv horovod-0.15.2-tf1.12.0-torch1.0.0-py3.5.simg" >> run_quadratic.sh
-$ echo "python tsubame-optuna-horovod-example/quadratic.py $STUDY_NAME $STORAGE_URL" >> run_quadratic.sh
+$ echo "python tsubame-optuna-example/quadratic.py $STUDY_NAME $STORAGE_URL" >> run_quadratic.sh
 ```
 
 You can parallelize the optimization just by submitting multiple jobs.
@@ -89,18 +89,6 @@ You can list the history of optimization as follows.
 ```console
 $ python print_study_history.py $STUDY_NAME $STORAGE_URL
 ```
-
-## Distributed Optimization for ChainerMN
-
-singularity shell --nv chainer-latest-python3.simg
-
-$ STORAGE_URL=postgres://postgres@$STORAGE_HOST:5432/
-$ STUDY_NAME=`~/.local/bin/optuna create-study --storage $STORAGE_URL`
-
-$ mpirun -np 2 -bind-to none -map-by slot -- \
-    python optuna/examples/chainermn_simple.py $STUDY_NAME $STORAGE_URL
-
-
 
 ## Distributed Optimization for MPI-based Learning
 
@@ -140,12 +128,55 @@ To run the MPI example:
 
 ```console
 $ mpirun -np 2 -bind-to none -map-by slot -- \
-    python tsubame-optuna-horovod-example/tensorflow_mnist_eager_optuna.py $STUDY_NAME $STORAGE_URL
+    python tsubame-optuna-example/tensorflow_mnist_eager_optuna.py $STUDY_NAME $STORAGE_URL
 ```
 
 You can list the history of optimization as follows.
 ```console
-$ python tsubame-optuna-horovod-example/print_study_history.py $STUDY_NAME $STORAGE_URL
+$ python tsubame-optuna-example/print_study_history.py $STUDY_NAME $STORAGE_URL
+```
+
+## Distributed Optimization for ChainerMN with RDB
+
+Let's parallelize a script written in ChainerMN.
+
+At first, build the ChainerMN image and run a container:
+
+```console
+$ module load singularity/2.6.1
+$ singularity pull docker://toshihikoyanase/chainer-ompi:latest
+$ singularity shell --nv chainer-ompi-latest.simg
+```
+
+With the container, install Python dependencies under the user directory:
+
+```console
+$ pip install --user psycopg2-binary
+# If you have already install pandas>=0.25.0, please downgrade it to 0.24.2 for Python 3.4.2.
+$ pip uninstall pandas && pip install --user pandas==0.24.2
+```
+
+Similarly to the Horovod example, run the example with interactive node.
+
+```console
+$ GROUP=<YOUR_GROUP>
+$ qrsh -g $GROUP -l h_node=1 -l h_rt=01:00:00
+```
+
+Create a study identifier in the container:
+
+```console
+$ singularity shell --nv chainer-ompi-latest.simg
+
+$ STORAGE_URL=postgres://postgres@$STORAGE_HOST:5432/
+$ STUDY_NAME=`~/.local/bin/optuna create-study --storage $STORAGE_URL`
+```
+
+Run the MPI example:
+
+```console
+$ mpirun -np 2 -bind-to none -map-by slot -- \
+    python tsubame-optuna-example/chainermn_gpu.py $STUDY_NAME $STORAGE_URL
 ```
 
 ## See Also
