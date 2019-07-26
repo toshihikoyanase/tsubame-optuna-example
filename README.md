@@ -90,6 +90,18 @@ You can list the history of optimization as follows.
 $ python print_study_history.py $STUDY_NAME $STORAGE_URL
 ```
 
+## Distributed Optimization for ChainerMN
+
+singularity shell --nv chainer-latest-python3.simg
+
+$ STORAGE_URL=postgres://postgres@$STORAGE_HOST:5432/
+$ STUDY_NAME=`~/.local/bin/optuna create-study --storage $STORAGE_URL`
+
+$ mpirun -np 2 -bind-to none -map-by slot -- \
+    python optuna/examples/chainermn_simple.py $STUDY_NAME $STORAGE_URL
+
+
+
 ## Distributed Optimization for MPI-based Learning
 
 Let's parallelize a script written in Horovod and TensorFlow.
