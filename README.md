@@ -172,12 +172,85 @@ $ STORAGE_URL=postgres://postgres@$STORAGE_HOST:5432/
 $ STUDY_NAME=`~/.local/bin/optuna create-study --storage $STORAGE_URL`
 ```
 
-Run the MPI example:
+Run the example:
 
 ```console
 $ mpirun -np 2 -bind-to none -map-by slot -- \
     python tsubame-optuna-example/chainermn_gpu.py $STUDY_NAME $STORAGE_URL
 ```
+
+## Distributed Optimization for Tensorflow without RDB
+
+Let's parallelize a script written in Horovod and TensorFlow.
+
+Download MNIST data:
+
+```console
+$ wget -O ~/mnist.npz https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz
+```
+
+Here, we'll run the example with interactive node. (You also can consolidate the following commands as a batch job.)
+
+```console
+$ GROUP=<YOUR_GROUP>
+$ qrsh -g $GROUP -l h_node=1 -l h_rt=01:00:00
+```
+
+Run a container:
+
+```console
+$ module load singularity/2.6.1
+$ singularity shell --nv horovod-0.15.2-tf1.12.0-torch1.0.0-py3.5.simg
+```
+
+To run the MPI example:
+
+```console
+$ mpirun -np 2 -bind-to none -map-by slot -- \
+    python tsubame-optuna-example/tensorflow_mnist_eager_optuna_inmemory.py
+```
+
+
+## Distributed Optimization for ChainerMN without RDB
+
+Let's parallelize a script written in ChainerMN.
+
+At first, build the ChainerMN image and run a container:
+
+```console
+$ module load singularity/2.6.1
+$ singularity pull docker://toshihikoyanase/chainer-ompi:latest
+$ singularity shell --nv chainer-ompi-latest.simg
+```
+
+With the container, install Python dependencies under the user directory:
+
+```console
+# If you have already install pandas>=0.25.0, please downgrade it to 0.24.2 for Python 3.4.2.
+$ pip uninstall pandas && pip install --user pandas==0.24.2
+```
+
+Similarly to the Horovod example, run the example with interactive node.
+
+```console
+$ GROUP=<YOUR_GROUP>
+$ qrsh -g $GROUP -l h_node=1 -l h_rt=01:00:00
+```
+
+Create a container:
+
+```console
+$ module load singularity/2.6.1
+$ singularity shell --nv chainer-ompi-latest.simg
+```
+
+Run the example:
+
+```console
+$ mpirun -np 2 -bind-to none -map-by slot -- \
+    python tsubame-optuna-example/chainermn_gpu_inmemory.py
+```
+
 
 ## See Also
 
