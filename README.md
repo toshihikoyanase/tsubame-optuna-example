@@ -251,6 +251,106 @@ $ mpirun -np 2 -bind-to none -map-by slot -- \
     python tsubame-optuna-example/chainermn_gpu_inmemory.py
 ```
 
+## Distributed Optimization for Tensorflow + Horovod without singularity
+
+Create `bin/setup_horovod.sh` to load modules necessary for TensorFlow + Horovod:
+
+```console
+#!/bin/bash
+module load python/3.6.5
+module load cuda/9.2.148
+module load cudnn/7.4
+module load nccl/2.4.2
+module load openmpi/2.1.2-opa10.9-t3-thread-multiple
+```
+
+Setup Python modules using `venv`.
+- A computing node with a GPU is required to setup modules correctly.
+- `horovod==0.13.11` works with `openmpi/2.1.2`, but `horovod>=0.14.0` doesn't.
+
+```console
+$ qrsh -l s_gpu=1 -l h_rt=0:10:00
+$ source bin/setup_horovod.sh
+$ python3.6 -m venv venv-horovod
+$ source venv-horovod/bin/activate
+$ python3.6 -m pip install -U pip
+$ pip install tensorflow-gpu
+$ pip install horovod==0.13.11
+$ pip install mpi4py
+$ pip install git+https://github.com/pfnet/optuna.git@titech-horovod-examples
+```
+
+Create `scripts/horovod-example.sh` as a job file:
+
+```console
+#!/bin/bash
+#$ -cwd
+#$ -N horovod-example
+
+. /etc/profile.d/modules.sh
+. bin/setup_horovod.sh
+source venv-horovod/bin/activate
+
+mpirun -npernode 1 -n 2 -x PATH  -x LD_LIBRARY_PATH \
+    -- python tsubame-optuna-example/horovod_gpu_inmemory.py
+```
+
+Submit the job:
+
+```console
+$ qsub -l s_gpu=2 -l h_rt=00:10:00 ./scripts/horovod-example.sh
+```
+
+
+## Distributed Optimization for ChainerMN without singularity
+
+Create `bin/setup_chainermn.sh` to load modules necessary for ChainerMN:
+
+```console
+#!/bin/bash
+module load python/3.6.5
+module load cuda/9.2.148
+module load cudnn/7.4
+module load nccl/2.4.2
+module load openmpi/2.1.2-opa10.9-t3
+```
+
+Setup Python modules using `venv`.
+- A computing node with a GPU is required to setup modules correctly.
+- Please make sure that you select `cupy-cuda92` instead of `cupy` to reduce installation time.
+
+```console
+$ qrsh -l s_gpu=1 -l h_rt=0:10:00
+$ source bin/setup_chainermn.sh
+$ python3.6 -m venv venv-chainer
+$ source venv-chainer/bin/activate
+$ python3.6 -m pip install -U pip
+$ pip install cupy-cuda92
+$ pip install chainer
+$ pip install mpi4py
+$ pip install git+https://github.com/pfnet/optuna.git@titech-horovod-examples
+```
+
+Create `scripts/chainermn-example.sh` as a job file:
+
+```console
+#!/bin/bash
+#$ -cwd
+#$ -N flatmpi
+
+. /etc/profile.d/modules.sh
+. bin/setup_chainermn.sh
+source venv-chainer/bin/activate
+
+mpirun -npernode 1 -n 2 -x PATH  -x LD_LIBRARY_PATH \
+    -- python tsubame-optuna-example/chainermn_gpu_inmemory.py
+```
+
+Submit the job:
+
+```console
+$ qsub -l s_gpu=2 -l h_rt=00:10:00 ./scripts/chainermn-example.sh
+```
 
 ## See Also
 
