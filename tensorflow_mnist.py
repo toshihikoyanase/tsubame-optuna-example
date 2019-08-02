@@ -138,7 +138,7 @@ def main(_):
     study_name = sys.argv[1]
     storage_url = sys.argv[2]
 
-    study = optuna.create_study(study_name=study_name, storage_url=storage_url,
+    study = optuna.create_study(study_name=study_name, storage=storage_url,
                                 load_if_exists=True)
     comm = MPI.COMM_WORLD
     if comm.rank == 0:
