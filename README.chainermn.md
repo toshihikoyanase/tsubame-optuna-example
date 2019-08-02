@@ -47,7 +47,7 @@ Create `scripts/chainermn-example.sh` as a job file:
 source venv-chainer/bin/activate
 
 mpirun -npernode 1 -n 2 -x PATH  -x LD_LIBRARY_PATH \
-    -- python tsubame-optuna-example/chainermn_gpu_inmemory.py
+    -- python tsubame-optuna-example/chainermn_mnist_inmemory.py
 ```
 
 Submit the job:
@@ -94,7 +94,7 @@ Create `scripts/chainermn-db-example.sh` as a job script:
 source venv-chainer/bin/activate
 
 mpirun -npernode 1 -n 2 -x PATH  -x LD_LIBRARY_PATH \
-    -- python tsubame-optuna-example/chainermn_gpu.py \
+    -- python tsubame-optuna-example/chainermn_mnist.py \
     (put the study name as a string here) \
     (put the storage url as a string here)
 ```
