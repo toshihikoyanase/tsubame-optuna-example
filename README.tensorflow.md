@@ -29,9 +29,7 @@ $ source bin/setup_tensorflow.sh
 $ python3.6 -m venv venv-tensorflow
 $ source venv-tensorflow/bin/activate
 $ python3.6 -m pip install -U pip
-$ pip install tensorflow-gpu
-$ pip install horovod==0.13.11
-$ pip install mpi4py
+$ pip install tensorflow-gpu horovod==0.13.11 mpi4py
 $ pip install git+https://github.com/pfnet/optuna.git@titech-horovod-examples
 ```
 

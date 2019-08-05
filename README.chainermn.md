@@ -22,6 +22,7 @@ module load openmpi/2.1.2-opa10.9-t3
 Setup Python modules using `venv`.
 - A computing node with a GPU is required to setup modules correctly.
 - Please make sure that you select `cupy-cuda92` instead of `cupy` to reduce installation time.
+- Please refer to [this document](https://gist.github.com/keisukefukuda/a260d00c62c53811272ff83daf400dee#file-0-readme-md) for further details of ChainerMN setup (in Japanese).
 
 ```console
 $ qrsh -l s_gpu=1 -l h_rt=0:10:00
@@ -29,9 +30,7 @@ $ source bin/setup_chainermn.sh
 $ python3.6 -m venv venv-chainer
 $ source venv-chainer/bin/activate
 $ python3.6 -m pip install -U pip
-$ pip install cupy-cuda92
-$ pip install chainer
-$ pip install mpi4py
+$ pip install mpi4py cupy-cuda92==6.2.0 chainer==6.2.0
 $ pip install git+https://github.com/pfnet/optuna.git@titech-horovod-examples
 ```
 
@@ -45,6 +44,9 @@ Create `scripts/chainermn-example.sh` as a job file:
 . /etc/profile.d/modules.sh
 . bin/setup_chainermn.sh
 source venv-chainer/bin/activate
+
+# OMP_NUM_THREADS affects the performance if you use Chainer with OpenCV.
+export OMP_NUM_THREADS=1
 
 mpirun -npernode 1 -n 2 -x PATH  -x LD_LIBRARY_PATH \
     -- python tsubame-optuna-example/chainermn_mnist_inmemory.py
@@ -92,6 +94,9 @@ Create `scripts/chainermn-db-example.sh` as a job script:
 . /etc/profile.d/modules.sh
 . bin/setup_chainermn.sh
 source venv-chainer/bin/activate
+
+# OMP_NUM_THREADS affects the performance if you use Chainer with OpenCV.
+export OMP_NUM_THREADS=1
 
 mpirun -npernode 1 -n 2 -x PATH  -x LD_LIBRARY_PATH \
     -- python tsubame-optuna-example/chainermn_mnist.py \
