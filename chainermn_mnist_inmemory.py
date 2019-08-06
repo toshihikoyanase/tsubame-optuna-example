@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     # Create a study in rank-0 node and share it among all nodes.
     if comm.rank == 0:
-        study = optuna.create_study()
+        study = optuna.create_study(direction='maximize')
         comm.mpi_comm.bcast(study.study_name)
         print('Study name:', study.study_name)
         print('Number of nodes:', comm.size)

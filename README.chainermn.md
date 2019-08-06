@@ -79,7 +79,7 @@ Create a study.
 $ STORAGE_HOST=<HOST_WHERE_POSTGRES_IS_RUNNING>
 $ STORAGE_URL=postgres://postgres@$STORAGE_HOST:5432/
 
-$ STUDY_NAME=`optuna create-study --storage $STORAGE_URL`
+$ STUDY_NAME=`optuna create-study --storage $STORAGE_URL --direction=maximize`
 ```
 
 Create `scripts/chainermn-db-example.sh` as a job script:
